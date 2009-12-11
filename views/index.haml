@@ -1,0 +1,8 @@
+%html
+  %head
+    %title= 'Bart Cheater'
+    %link{:rel => 'stylesheet', :type => 'text/css', :media => 'all', :href => '/main.css'}
+  %body
+    -['EMBR', 'CIVC'].each do |station|
+      <h1>#{station}</h1>
+      =(create_station station).line_to_s

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" 
+   "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" >
+	<head>
+		<title>Bart</title>
+		<style type="text/css" media="screen">
+			div {max-width:300px;}
+			div.destination {font-size:24px;font-weight:bold;border:2px solid #00c;text-align:center;margin:0px -2px;}
+			div.estimates {padding-bottom:15px;}
+			div.good {background-color:#8d8;}
+			div.ignore {opacity:0.3;}
+			div.opposite {opacity:0.7; background-color:#f88;}
+			span.red {color:#c00;font-weight:bold;}
+		</style>
+	</head>
+<body>
+<%
+require 'rubygems'
+require 'open-uri'
+require 'hpricot'
+require 'sinatra'
+get '/hi' do
+  "Hello World!"
+end
+
+def opp_dir? station
+	return station.match(/daly|millbrae|airport|24th/i)
+end
+
+def print_est e, dp
+	dest = (e/"destination").to_s
+	class_name = (dp || dest.match(/dubl/i)) ? "good" : "ignore"
+	class_name = "opposite" if class_name == "ignore" && (opp_dir? dest)
+	info = (e/"estimate").to_s.gsub("Arrived","<span class=\"red\">Arrived</span>")
+	puts "<div class=\"#{class_name}\">"
+	puts "<b>#{dest}</b>: <em>#{info}</em>"
+	puts "</div>"
+end
+
+def find_and_sort_opp_times opposite
+	times = []
+	opposite.each do |e|
+		times += (e/"estimate").inner_html.gsub("Arrived","0").gsub(/[^\d,]/,'').split(',')
+	end
+	times.sort{|x,y| x.to_i<=>y.to_i}
+end
+
+doc = Hpricot(open("http://www.bart.gov/dev/eta/bart_eta.xml"))
+list = ["DUBL", "EMBR"]
+dest = {:DUBL => "", :EMBR => ""}
+(doc/"station").each do |s|
+	abbr = s/'abbr'
+	if list.include?(abbr.inner_html)
+		puts "<div class=\"destination\">#{abbr}</div><div class=\"estimates\">"
+		opposite = (s/"eta").select{|x| (opp_dir? (x/"destination").to_s)}
+		if abbr.inner_html=='DUBL'
+			opposite.each do |e|
+				print_est e, true
+			end
+		else
+			times = find_and_sort_opp_times opposite
+			puts '<div class="opposite">'
+			puts times.map{|t| t.to_i==0?'Arr':"#{t}m"}.join(', ')
+			puts '</div>'
+		end
+		(s/"eta").reject{|x| (opp_dir? (x/"destination").to_s)}.each do |e|
+			print_est e, (abbr.inner_html=='DUBL')
+		end
+		puts "</div>"
+	end
+end
+%>
+</html>
