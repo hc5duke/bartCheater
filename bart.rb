@@ -2,6 +2,7 @@ require 'rubygems'
 require 'sinatra'
 require 'open-uri'
 require 'hpricot'
+require 'ruby-debug'
 
 #
 # routes/actions
@@ -11,8 +12,11 @@ get '/main.css' do
   sass :main
 end
 
-get '/at' do
-  Bart.new true
+get '/bart' do
+  bart = Bart.new true
+  (bart.stations.map do |station|
+    "<h1>#{station.name}</h1> #{station.line_to_s}}"
+  end).join(', ')
 end
 
 get '/' do
@@ -21,35 +25,6 @@ get '/' do
   station = create_station name
   "<h1>#{station.name}</h1> #{station.line_to_s}}"
   haml :index
-end
-
-# get '/' do
-#   haml :index
-#   doc = Hpricot(open("sample/1807.xml"))
-#   _puts = "<br/>EMBR<br/>"
-#   s = find_station "EMBR"
-#   abbr = (s/"abbr").inner_html
-#   opposite = (s/"eta").select{|x| (opp_dir? (x/"destination").to_s)}
-#   if abbr=='DUBL'
-#     opposite.each do |e|
-#       _puts += print_est e, true
-#     end
-#   else
-#     times = find_and_sort_opp_times opposite
-#     _puts += times.map{|t| t.to_i==0?'Arr':"#{t}m"}.join(', ')
-#   end
-#   (s/"eta").reject{|x| (opp_dir? (x/"destination").to_s)}.each do |e|
-#     _puts += print_est e, (abbr=='DUBL')
-#   end
-#   _puts
-# end
-
-def stations
-  @stations ||= Hpricot(open("sample/1807.xml"))/"station"
-end
-
-def create_station station
-  Station.new stations.find{|x| (x/"abbr").inner_html == station}
 end
 
 # def find_station station
@@ -120,12 +95,18 @@ end
 
 class Bart
   attr_accessor :trains, :stations
+  @@stations_to_watch = ['EMBR', 'MONT', 'POWL', 'CIVC']
+
   def initialize static=false
     xml = static ? "sample/1807.xml" : "http://www.bart.gov/dev/eta/bart_eta.xml"
-    @system = Hpricot(open(xml))/"station"
+    @stations = parse_stations(Hpricot(open(xml))/"station")
   end
 
-  def parse
-    @stations = ''
+  def parse_stations doc
+    doc.find_all do |x|
+      @@stations_to_watch.include?((x/"abbr").inner_html)
+    end.map do |x|
+      Station.new x
+    end
   end
 end
