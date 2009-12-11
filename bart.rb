@@ -46,12 +46,10 @@ class Station
   end
 
   def line_to_s
-    [
-      lines.select{|e| e.going_home?}.map{|e| "#{e.destination} #{e.estimates.join(':')}"}.join("<br/>\n"),
-      lines.select{|e| e.westbound?}.map{|e| "#{e.destination} #{e.estimates.join(':')}"}.join("<br/>\n"),
-      lines.select{|e| e.eastbound? && !e.going_home?}.map{|e| "#{e.destination} #{e.estimates.join(':')}"}.join("<br/>\n")
-    ].join "<br/><br/>\n"
-    # lines.map{|e| "#{e.destination} #{e.estimates.join(':')}"}.join("<br/>\n")
+    estimates = []
+    (Line.estimates_for lines, :going_home?) + "<br/>\n" +
+    (Line.estimates_for lines, :westbound?) + "<br/>\n" +
+    (Line.estimates_for lines, :eastbound?)
   end
 end
 
@@ -62,19 +60,15 @@ class Line
     @estimates = (doc/"estimate").inner_html.gsub(/\s|min/,'').split(/,/).map(&:to_i)
   end
 
-  def westbound?
-    !!@destination.match(/daly|millbrae|airport|24th/i)
-  end
-  def eastbound?; !westbound? end
-
-  def going_home?
-    !!@destination.match(/dubl/i)
+  def self.estimates_for lines, dir
+    lines.select{|e| e.send dir}.map{|e| e.estimates}.flatten.sort.join ', '
   end
 
-  def sort_value; going_home? ? -1 : (westbound? ? 0 : 1) end
-  def <=> obj
-    sort_value <=> obj.sort_value
-  end
+  def westbound?;   !!@destination.match(/daly|millbrae|airport|24th/i) end
+  def eastbound?;   !westbound? && !going_home? end
+  def going_home?;  !!@destination.match(/dubl/i) end
+  def sort_value;   going_home? ? -1 : (westbound? ? 0 : 1) end
+  def <=> obj;      sort_value <=> obj.sort_value end
 end
 
 class Train
