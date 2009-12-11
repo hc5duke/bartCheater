@@ -42,11 +42,16 @@ class Station
   alias :name :abbr
   def initialize doc
     @abbr = (doc/"abbr").inner_html
-    @lines = (doc/"eta").map{|e| eta = Line.new e}.sort
+    @lines = (doc/"eta").map{|e| Line.new e}.sort
   end
 
   def line_to_s
-    lines.map{|e| "#{e.destination} #{e.estimates.join(':')}"}.join("<br/>\n")
+    [
+      lines.select{|e| e.going_home?}.map{|e| "#{e.destination} #{e.estimates.join(':')}"}.join("<br/>\n"),
+      lines.select{|e| e.westbound?}.map{|e| "#{e.destination} #{e.estimates.join(':')}"}.join("<br/>\n"),
+      lines.select{|e| e.eastbound? && !e.going_home?}.map{|e| "#{e.destination} #{e.estimates.join(':')}"}.join("<br/>\n")
+    ].join "<br/><br/>\n"
+    # lines.map{|e| "#{e.destination} #{e.estimates.join(':')}"}.join("<br/>\n")
   end
 end
 
