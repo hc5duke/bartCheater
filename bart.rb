@@ -12,43 +12,29 @@ get '/main.css' do
   sass :main
 end
 
-get '/bart' do
-  bart = Bart.new true
-  (bart.stations.map do |station|
-    "<h1>#{station.name}</h1> #{station.line_to_s}}"
-  end).join(', ')
-end
-
 get '/' do
   require 'haml'
-  name = params['station'] || 'EMBR'
-  station = create_station name
-  "<h1>#{station.name}</h1> #{station.line_to_s}}"
+  @bart = Bart.new true
   haml :index
 end
 
-# def find_station station
-#   stations.find{|x| (x/"abbr").inner_html == station}
-# end
+#
+# models
+#
+class Bart
+  attr_accessor :trains, :stations
+  @@stations_to_watch = ['EMBR', 'MONT', 'POWL', 'CIVC']
 
-def opp_dir? station
-  return station.match(/daly|millbrae|airport|24th/i)
-end
-
-def print_est e, dp
-  dest = (e/"destination").to_s
-  class_name = (dp || dest.match(/dubl/i)) ? "good" : "ignore"
-  class_name = "opposite" if class_name == "ignore" && (opp_dir? dest)
-  info = (e/"estimate").to_s
-  return "#{dest}: #{info}"
-end
-
-def find_and_sort_opp_times opposite
-  times = []
-  opposite.each do |e|
-    times += (e/"estimate").inner_html.gsub("Arrived","0").gsub(/[^\d,]/,'').split(',')
+  def initialize static=false
+    xml = static ? "sample/1807.xml" : "http://www.bart.gov/dev/eta/bart_eta.xml"
+    @stations = parse_stations(Hpricot(open(xml))/"station")
   end
-  times.sort{|x,y| x.to_i<=>y.to_i}
+
+  def parse_stations doc
+    @@stations_to_watch.map do |st|
+      Station.new(doc.find{|x| (x/"abbr").inner_html == st})
+    end
+  end
 end
 
 class Station
@@ -58,16 +44,17 @@ class Station
     @abbr = (doc/"abbr").inner_html
     @lines = (doc/"eta").map{|e| eta = Line.new e}.sort
   end
+
   def line_to_s
-    lines.map{|e| e.destination + " " + e.estimate}.join('<br/>')
+    lines.map{|e| "#{e.destination} #{e.estimates.join(':')}"}.join("<br/>\n")
   end
 end
 
 class Line
-  attr_accessor :destination, :estimate
+  attr_accessor :destination, :estimates
   def initialize doc
     @destination = (doc/"destination").inner_html
-    @estimate = (doc/"estimate").inner_html
+    @estimates = (doc/"estimate").inner_html.gsub(/\s|min/,'').split(/,/).map(&:to_i)
   end
 
   def westbound?
@@ -90,23 +77,5 @@ class Train
   def initialize options
     @destination = options.destination
     @stations = options.station
-  end
-end
-
-class Bart
-  attr_accessor :trains, :stations
-  @@stations_to_watch = ['EMBR', 'MONT', 'POWL', 'CIVC']
-
-  def initialize static=false
-    xml = static ? "sample/1807.xml" : "http://www.bart.gov/dev/eta/bart_eta.xml"
-    @stations = parse_stations(Hpricot(open(xml))/"station")
-  end
-
-  def parse_stations doc
-    doc.find_all do |x|
-      @@stations_to_watch.include?((x/"abbr").inner_html)
-    end.map do |x|
-      Station.new x
-    end
   end
 end
