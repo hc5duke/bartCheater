@@ -3,5 +3,5 @@
     %title= 'Bart Cheater'
     %link{:rel => 'stylesheet', :type => 'text/css', :media => 'all', :href => '/main.css'}
   %body
-  -@bart.stations.map do |station|
-    ="<div><h1>#{station.name}</h1> #{station.line_to_s}</div>"
+    -@bart.trains.each do |train|
+      ="<div>#{train.to_s}</div>"

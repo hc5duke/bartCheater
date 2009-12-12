@@ -17,46 +17,72 @@ get '/' do
   @bart = Bart.new true
   haml :index
 end
+@@station_names   = ['EMBR', 'MONT', 'POWL', 'CIVC']
+@@station_offsets = [     0,      2,      3,      5] # time between stations
 
 #
 # models
 #
 class Bart
   attr_accessor :trains, :stations
-  @@stations_to_watch = ['EMBR', 'MONT', 'POWL', 'CIVC']
-
   def initialize static=false
     xml = static ? "sample/1807.xml" : "http://www.bart.gov/dev/eta/bart_eta.xml"
-    @stations = parse_stations(Hpricot(open(xml))/"station")
+    @doc = Hpricot(open(xml))/"station"
+    parse_stations
+    find_trains
   end
 
-  def parse_stations doc
-    @@stations_to_watch.map do |st|
-      Station.new(doc.find{|x| (x/"abbr").inner_html == st})
+  def parse_stations
+    @stations = @@station_names.map do |st|
+      Station.new(@doc.find{|x| (x/"abbr").inner_html == st})
     end
+  end
+
+  def find_trains
+    @trains = []
+    @stations.each do |st|
+      [:home, :west].each do |dir|
+        st.lines.select{|line| line.direction == dir}.map(&:estimates).flatten.sort.each do |eta|
+          train = Train.new :destination => dir, :eta => (dir == :west) ? eta - st.offset : eta + st.offset
+          @trains << train if new_train? train, st
+        end
+        @trains << '</div><div style="clear:left;"></div><div>'
+      end
+      @trains << '</div><div style="clear:left;"></div><div>'
+    end
+  end
+
+  def new_train? train, station
+    !@trains.find{|t| }
+  end
+end
+
+class Train
+  attr_accessor :destination, :eta
+  def initialize options
+    @destination = options[:destination]
+    @eta = options[:eta]
+  end
+
+  def to_s
+    "#{@destination} #{@eta}"
   end
 end
 
 class Station
-  attr_accessor :abbr, :lines
+  attr_accessor :abbr, :lines, :offset
   alias :name :abbr
   def initialize doc
     @abbr = (doc/"abbr").inner_html
     @lines = (doc/"eta").map{|e| Line.new e}.sort
-  end
-
-  def line_to_s
-    estimates = []
-    (Line.estimates_for lines, :going_home?) + "<br/>\n" +
-    (Line.estimates_for lines, :westbound?) + "<br/>\n" +
-    (Line.estimates_for lines, :eastbound?)
+    @offset = @@station_offsets[@@station_names.index(abbr)]
   end
 end
 
 class Line
   attr_accessor :destination, :estimates
   def initialize doc
-    @destination = (doc/"destination").inner_html
+    @destination = Destination.new((doc/"destination").inner_html)
     @estimates = (doc/"estimate").inner_html.gsub(/\s|min/,'').split(/,/).map(&:to_i)
   end
 
@@ -64,17 +90,22 @@ class Line
     lines.select{|e| e.send dir}.map{|e| e.estimates}.flatten.sort.join ', '
   end
 
-  def westbound?;   !!@destination.match(/daly|millbrae|airport|24th/i) end
-  def eastbound?;   !westbound? && !going_home? end
-  def going_home?;  !!@destination.match(/dubl/i) end
-  def sort_value;   going_home? ? -1 : (westbound? ? 0 : 1) end
-  def <=> obj;      sort_value <=> obj.sort_value end
+  def direction
+    @destination.direction
+  end
+
+  def value
+    direction == :home ? -1 : direction == :west ? 0 :1
+  end
+
+  def <=> obj; value <=> obj.value end
 end
 
-class Train
-  attr_accessor :destination, :nearby_stations
-  def initialize options
-    @destination = options.destination
-    @stations = options.station
+
+class Destination
+  attr_accessor :name, :direction
+  def initialize name
+    @name = name
+    @direction = name.match(/daly|millbrae|airport|24th/i) ? :west : name.match(/dubl/i) ? :home : :east
   end
 end
