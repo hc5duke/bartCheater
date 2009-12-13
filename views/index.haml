@@ -1,21 +1,26 @@
+-using_color = (params[:color] == 'true')
 %html
   %head
     %title= 'Bart Cheater'
     %script{:type => "text/javascript", :src  => "http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"}
     %script{:type => "text/javascript", :src=> "/main.js"}
     %link{:rel => 'stylesheet', :type => 'text/css', :media => 'all', :href => '/main.css'}
+    %link{:rel => "icon", :href => "/favicon.ico", :type => "image/png"}
   %body
-    <input type="button" id="refresh" value="Refresh">
-    <div class="br">&nbsp;<br/></div>
+    %div{:id => "buttons"}
+      %img{:src => "/bc_small.png"}
+      %input{:type => "button", :value => "Refresh", :id => "refresh"}
+      %input{:type => "button", :value => "#{"No " if using_color}Color", :id => "#{"no_" if using_color}color"}
+    %div{:class => "br"}
     <h1>Home</h1>
     -@bart.trains[:home].each do |train|
       -next if train.offset_eta < 0
-      ="<div class=\"train #{train.destination.class_name}\">#{train.offset_eta}"
+      ="<div class=\"train #{train.destination.class_name if using_color}\">#{train.offset_eta}"
       </div>
     <div class="br">&nbsp;<br/></div>
     <h1>West</h1>
     -@bart.trains[:west].each do |train|
       -next if train.offset_eta < 0
-      ="<div class=\"train #{train.destination.class_name}\">#{train.offset_eta}"
+      ="<div class=\"train #{train.destination.class_name if using_color}\">#{train.offset_eta}"
       </div>
       
