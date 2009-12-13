@@ -4,6 +4,7 @@ require 'open-uri'
 require 'hpricot'
 require 'ruby-debug'
 require 'haml'
+require 'json'
 
 #
 # routes/actions
@@ -12,6 +13,7 @@ get '/' do
   @bart = Bart.new
   haml :index
 end
+
 get '/debug' do
   @bart = Bart.new :debug=>true
   haml :index
@@ -19,7 +21,7 @@ end
 
 @@station_names   = ['EMBR', 'MONT', 'POWL', 'CIVC', '16TH']
 @@station_offsets = [     0,      2,      3,      5,      8] # time between stations
-
+@@station_index = 0
 #
 # models
 #
@@ -27,6 +29,8 @@ class Bart
   attr_accessor :trains, :stations
   def initialize options={}
     xml = options[:debug] ? "sample/1807.xml" : "http://www.bart.gov/dev/eta/bart_eta.xml"
+    center = options[:center] || 'EMBR'
+    @@station_index = @@station_names.index center
     @doc = Hpricot(open(xml))/"station"
     @stations = @@station_names.map do |st|
       Station.new(@doc.find{|x| (x/"abbr").inner_html == st})
@@ -92,7 +96,7 @@ class Station
   end
 
   def offset
-    @@station_offsets[@@station_names.index(@abbr)]
+    @@station_offsets[@@station_names.index(@abbr)] - @@station_offsets[@@station_index]
   end
 end
 
