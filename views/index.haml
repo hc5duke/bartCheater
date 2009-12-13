@@ -13,10 +13,11 @@
       %input{:type => "button", :value => "#{"No " if using_color}Color", :id => "#{"no_" if using_color}color"}
     %div{:class => "br"}
     -[:home, :west].each do |dir|
-      %h1
-        =dir.to_s.titlize
-      -@bart.trains[dir].each do |train|
-        -next if train.offset_eta < 0
-        %div{:class => "train #{train.destination.class_name if using_color}"}
-          =train.offset_eta
-      %div{:class => "br"}
+      %div{:id => dir.to_s}
+        %h1
+          =dir.to_s.titlize
+        -@bart.trains[dir].each do |train|
+          -next if train.offset_eta < 0
+          %div{:class => "train #{train.destination.class_name if using_color}"}
+            =train.offset_eta
+        %div{:class => "br"}
