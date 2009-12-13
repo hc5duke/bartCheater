@@ -1,9 +1,18 @@
 body
   :margin 0px
   :font-family helvetica, arial
+  div#buttons
+    :background-color #bbb
+    input[type=button]
+      :background none
+      :float left
+      &#color
+        :background-color #f80
+      &#no_color
+        :background-color #888
   h1
-    :font-size 14pt
-    :margin 4px
+    :font-size 12pt
+    :margin 2px
   div.train
     :float left
     :font-size 10pt
@@ -18,13 +27,3 @@ body
       :background-color #8ff
   div.br
     :clear left
-  div#buttons
-    img
-      :float left
-    input[type=button]
-      :background none
-      :float left
-      &#color
-        :background-color #f80
-      &#no_color
-        :background-color #888

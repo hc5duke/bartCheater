@@ -143,3 +143,9 @@ get '/main.css' do
   require 'sass'
   sass :main
 end
+
+class String
+  def titlize
+    split(/(\W)/).map(&:capitalize).join
+  end
+end
