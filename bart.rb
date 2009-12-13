@@ -3,15 +3,20 @@ require 'sinatra'
 require 'open-uri'
 require 'hpricot'
 require 'ruby-debug'
+require 'haml'
 
 #
 # routes/actions
 #
 get '/' do
-  require 'haml'
-  @bart = Bart.new true
+  @bart = Bart.new
   haml :index
 end
+get '/debug' do
+  @bart = Bart.new :debug=>true
+  haml :index
+end
+
 @@station_names   = ['EMBR', 'MONT', 'POWL', 'CIVC', '16TH']
 @@station_offsets = [     0,      2,      3,      5,      8] # time between stations
 
@@ -20,8 +25,8 @@ end
 #
 class Bart
   attr_accessor :trains, :stations
-  def initialize static=false
-    xml = static ? "sample/1807.xml" : "http://www.bart.gov/dev/eta/bart_eta.xml"
+  def initialize options={}
+    xml = options[:debug] ? "sample/1807.xml" : "http://www.bart.gov/dev/eta/bart_eta.xml"
     @doc = Hpricot(open(xml))/"station"
     @stations = @@station_names.map do |st|
       Station.new(@doc.find{|x| (x/"abbr").inner_html == st})
