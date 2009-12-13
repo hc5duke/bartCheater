@@ -1,11 +1,23 @@
 body
-  :font-size 10pt
+  :margin 0px
+  :font-family helvetica, arial
   h1
     :font-size 14pt
     :margin 4px
-    :text-align center
-  div
+  div.train
     :float left
-    :margin 2px
-    :padding 3px
+    :font-size 10pt
+    :margin 1px
+    :padding 1px
     :border 1px solid gray
+    &.millbrae
+      :background-color #ff8
+    &.daly_city, &._24th_street
+      :background-color #f88
+    &.sf_airport, &.sfo_millbrae, &.dublin_pleasanton
+      :background-color #8ff
+  div.br
+    :clear left
+  input[type=button]
+    :background none
+    :float right
