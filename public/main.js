@@ -71,18 +71,20 @@ var Bart = Class.create({
     if (this._lastSelected) {
       this._lastSelected.removeClassName('selected');
     }
-    ['MONT', 'POWL', 'CIVC', '16TH'].each(function(c){
-      $$('.reachable-'+c).invoke('removeClassName', 'reachable-'+c);
+    ['_MONT', '_POWL', '_CIVC', '_16TH'].each(function(c){
+      $$('.reachable'+c).invoke('removeClassName', 'reachable'+c);
     });
     trainDiv.addClassName('selected')
     if (trainData.direction == 'home') {
-      if (trainData.seen_at['_CIVC']) {
-        this._directedTrains.west.each(function(t) {
-          if (t.div && t.seen_at['_CIVC'] < trainData.seen_at['_CIVC']) {
-            t.div.addClassName('reachable-CIVC')
-          }
-        });
-      }
+      ['_MONT', '_POWL', '_CIVC', '_16TH'].each(function(c){
+        if (trainData.seen_at[c]) {
+          this._directedTrains.west.each(function(t) {
+            if (t.div && t.seen_at[c] < trainData.seen_at[c]) {
+              t.div.addClassName('reachable'+c)
+            }
+          });
+        }
+      }, this)
     }
     this._lastSelected = trainDiv;
   },
