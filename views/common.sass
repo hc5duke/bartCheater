@@ -1,0 +1,21 @@
+// font-size
+!small = 10px
+!medium = 12px
+!large = 13px
+
+// color
+!bart_blue = #8be
+!blue_line = #44f
+!red_line = #f44
+!yellow_line = #dd2
+!selected_yellow = #dd8
+
+=with_color(!c)
+  :width 40px
+  :padding 8px 0px
+  :border-width 5px
+  :border-color = !c
+
+=rounded(!width = 3px)
+  :-moz-border-radius = !width
+  :-webkit-border-radius = !width

@@ -1,9 +1,20 @@
 var Bart = Class.create({
   initialize: function(options) {
     this._trains = options.trains;
+    this._station = options.station;
+    this._directedTrains = {};
+    this._splitTrains();
     this._lastSelected = null;
     document.observe('dom:loaded', this.setupHtml.bind(this));
     document.observe('dom:loaded', this.observeClicks.bind(this));
+  },
+
+  _splitTrains: function() {
+    this._dirs.each(function(dir) {
+      this._directedTrains[dir] = this._trains.findAll(function(t){
+        return t.direction == dir;
+      });
+    }, this);
   },
 
   setupHtml: function() {
@@ -17,13 +28,16 @@ var Bart = Class.create({
 
     ['home', 'west'].each(function(dir) {
       var div = $('trains_'+dir);
-      this._trains.findAll(function(t){
-        return t.direction == dir;
-      }).each(function(train){
-        if (!train.seen_at["_EMBR"]) return;
-        var trainDiv = ["<div class=\"train ", (noColor ? train.destination : ''), "\">", train.seen_at["_EMBR"], "</div>"]
-        div.insert(trainDiv.join(''));
-      });
+      var here = '_' + this._station;
+      this._directedTrains[dir].each(function(train){
+        if (!train.seen_at[here]) return;
+        var className = 'box train ' + (noColor ? train.destination : '');
+        var trainDiv = new Element('div', {'class': className}).update(train.seen_at["_EMBR"]);
+        train.div = trainDiv;
+        trainDiv.store('train', train);
+        div.insert(trainDiv);
+      }, this);
+      div.insert('<div class="br">&nbsp;</div>');
     }, this);
   },
 
@@ -34,11 +48,18 @@ var Bart = Class.create({
   },
 
   trainClickEvent: function(e) {
-    var train = e.element();
+    var trainDiv = e.element();
+    var trainData = trainDiv.retrieve('train');
     if (this._lastSelected) {
       this._lastSelected.removeClassName('selected');
     }
-    train.addClassName('selected')
-    this._lastSelected = train;
-  }
+    trainDiv.addClassName('selected')
+    if (trainData.direction == 'home') {
+      if (trainData.seen_at['_CIVC'])
+      console.log(this._directedTrains.west);
+    }
+    this._lastSelected = trainDiv;
+  },
+
+  _dirs: ['home', 'west']
 });

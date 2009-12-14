@@ -5,7 +5,7 @@
     %script{:type => "text/javascript", :src  => "http://ajax.googleapis.com/ajax/libs/prototype/1.6.1.0/prototype.js"}
     %script{:type => "text/javascript", :src=> "/main.js"}
     %script
-      ="var bart = new Bart({trains: #{@bart.to_json}});"
+      ="var bart = new Bart(#{@bart.to_json});"
     %link{:rel => 'stylesheet', :type => 'text/css', :media => 'all', :href => '/main.css'}
     %link{:rel => "icon", :href => "/favicon.ico", :type => "image/png"}
   %body
@@ -15,11 +15,13 @@
       %input{:type => "button", :value => "#{"No " if using_color}Color", :id => "#{"no_" if using_color}color"}
     %div{:class => "br"}
     %div{:id => "trains"}
-      %h2
+      %div{:class => "box direction"}
         Home
       %div{:id => "trains_home"}
       %div{:class => "br"}
-      %h2
+      %div{:class => "box direction"}
         West
       %div{:id => "trains_west"}
-    
+      %div{:class => "br"}
+    %div{:id => "comment"}
+      status

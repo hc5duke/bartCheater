@@ -26,11 +26,11 @@ end
 # models
 #
 class Bart
-  attr_accessor :trains, :stations
+  attr_accessor :trains, :stations, :center
   def initialize options={}
     xml = options[:debug] ? "sample/1807.xml" : "http://www.bart.gov/dev/eta/bart_eta.xml"
-    center = options[:center] || 'EMBR'
-    @@station_index = @@station_names.index center
+    @center = options[:center] || 'EMBR'
+    @@station_index = @@station_names.index @center
     @doc = Hpricot(open(xml))/"station"
     @stations = @@station_names.map do |st|
       Station.new(@doc.find{|x| (x/"abbr").inner_html == st})
@@ -61,7 +61,7 @@ class Bart
   end
 
   def to_json
-    json = @trains.values.flatten.map do |train|
+    t = @trains.values.flatten.map do |train|
       seen = {}
       train.seen_at.map do |k,v|
         seen["_#{k}"] = v
@@ -71,7 +71,8 @@ class Bart
         :direction => train.destination.direction,
         :seen_at => seen
       }
-    end.to_json
+    end
+  {:station => @center, :trains => t}.to_json
   end
 end
 

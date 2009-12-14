@@ -11,28 +11,37 @@ body
         :background-color darkorange
       &#no_color
         :background-color #888
-  h2
-    :font-size !large
-    :margin 2px
-  div.train
-    :float left
-    :font-size !medium
-    :margin 1px
+  div#trains
+    #trains_home, #trains_west
+      :float left
+    .box
+      +rounded
+      :font-size !large
+      :font-weight bold
+      :float left
+      :margin 1px
+      :width 50px
+      :padding 13px 0px
+      &.direction
+      &.train
+        :width 50px
+        :text-align center
+        :border 1px solid gray
+        :cursor pointer
+        &.millbrae
+          +with_color(!yellow_line)
+        &.daly_city, &._24th_street
+          +with_color(!red_line)
+        &.sf_airport, &.sfo_millbrae, &.dublin_pleasanton
+          +with_color(!blue_line)
+        &:hover
+          :background-color = !bart_blue
+        &.selected
+          :background-color = !selected_yellow
+  div#comment
+    :margin-top 5px
     :padding 1px
-    :width 50px
-    :padding 13px 0px
-    :text-align center
-    :border 1px solid gray
-    :cursor pointer
-    &.millbrae
-      +with_color(!yellow_line)
-    &.daly_city, &._24th_street
-      +with_color(!red_line)
-    &.sf_airport, &.sfo_millbrae, &.dublin_pleasanton
-      +with_color(!blue_line)
-    &:hover
-      :background-color = !bart_blue
-    &.selected
-      :background-color = !selected_yellow
+    :border 1px dotted gray
+    :color gray
   div.br
     :clear left
