@@ -56,8 +56,22 @@ class Bart
     if !found
       trains << train
     else
-      found.seen_at << train.station
+      found.seen_at[train.station.name] = train.eta
     end
+  end
+
+  def to_json
+    json = @trains.values.flatten.map do |train|
+      seen = {}
+      train.seen_at.map do |k,v|
+        seen["_#{k}"] = v
+      end
+      {
+        :destination => train.destination.class_name,
+        :direction => train.destination.direction,
+        :seen_at => seen
+      }
+    end.to_json
   end
 end
 
@@ -67,7 +81,7 @@ class Train
     @destination = options[:destination]
     @eta = options[:eta]
     @station = options[:station]
-    @seen_at = [@station]
+    @seen_at = {@station.name => @eta}
   end
 
   def offset_eta
@@ -97,6 +111,10 @@ class Station
 
   def offset
     @@station_offsets[@@station_names.index(@abbr)] - @@station_offsets[@@station_index]
+  end
+
+  def to_json
+    name
   end
 end
 
@@ -142,10 +160,12 @@ class Destination
   end
 end
 
-# css, js
-get '/main.css' do
-  require 'sass'
-  sass :main
+# css
+get '/main.css'   do
+  require 'sass'; sass :main
+end
+get '/common.css' do
+  require 'sass'; sass :common
 end
 
 class String

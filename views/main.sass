@@ -1,32 +1,43 @@
+@import common
+=with_color(!c)
+  :width 40px
+  :padding 8px 0px
+  :border-width 5px
+  :border-color = !c
+
 body
   :margin 0px
   :font-family helvetica, arial
   div#buttons
-    :background-color #bbb
+    :background-color darkgray
     input[type=button]
       :background none
-      :float left
+      &#refresh
+        :background-color lightgray
       &#color
-        :background-color #f80
+        :background-color darkorange
       &#no_color
         :background-color #888
-  h1
-    :font-size 12pt
+  h2
+    :font-size !large
     :margin 2px
   div.train
     :float left
-    :font-size 10pt
+    :font-size !medium
     :margin 1px
     :padding 1px
+    :width 50px
+    :padding 13px 0px
+    :text-align center
     :border 1px solid gray
     :cursor pointer
     &.millbrae
-      :background-color #ffc
+      +with_color(!yellow_line)
     &.daly_city, &._24th_street
-      :background-color #fcc
+      +with_color(!red_line)
     &.sf_airport, &.sfo_millbrae, &.dublin_pleasanton
-      :background-color #cff
+      +with_color(!blue_line)
     &:hover
-      :background-color #4af
+      :background-color = !bart_blue
   div.br
     :clear left

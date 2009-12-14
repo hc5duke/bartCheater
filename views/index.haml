@@ -4,20 +4,22 @@
     %title= 'Bart Cheater'
     %script{:type => "text/javascript", :src  => "http://ajax.googleapis.com/ajax/libs/prototype/1.6.1.0/prototype.js"}
     %script{:type => "text/javascript", :src=> "/main.js"}
+    %script
+      ="var trains = #{@bart.to_json};"
     %link{:rel => 'stylesheet', :type => 'text/css', :media => 'all', :href => '/main.css'}
     %link{:rel => "icon", :href => "/favicon.ico", :type => "image/png"}
   %body
     %div{:id => "buttons"}
-      %img{:src => "/bc_small.png"}
+      %img{:src => "/bc_small.png", :width => 27, :height => 20}
       %input{:type => "button", :value => "Refresh", :id => "refresh"}
       %input{:type => "button", :value => "#{"No " if using_color}Color", :id => "#{"no_" if using_color}color"}
     %div{:class => "br"}
-    -[:home, :west].each do |dir|
-      %div{:id => dir.to_s}
-        %h1
-          =dir.to_s.titlize
-        -@bart.trains[dir].each do |train|
-          -next if train.offset_eta < 0
-          %div{:class => "train #{train.destination.class_name if using_color}"}
-            =train.offset_eta
-        %div{:class => "br"}
+    %div{:id => "trains"}
+      %h2
+        Home
+      %div{:id => "trains_home"}
+      %div{:class => "br"}
+      %h2
+        West
+      %div{:id => "trains_west"}
+    
