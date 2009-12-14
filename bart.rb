@@ -42,7 +42,7 @@ class Bart
     stations.each do |st|
       @trains.keys.each do |dir|
         relevant_lines = st.lines.select{|line| line.direction == dir}
-        relevant_lines.map(&:trains).flatten.each do |train|
+        relevant_lines.map{|line| line.trains }.flatten.each do |train|
           check_new_train @trains[dir], train
         end
         @trains[dir].sort!
@@ -96,7 +96,7 @@ class Train
     if @destination.direction == obj.destination.direction
       offset_eta <=> obj.offset_eta
     else
-      throw Exception.new "directions do not match (#{@destination.direction} != #{obj.destination.direction})"
+      throw Exception.new("directions do not match -- #{@destination.direction} != #{obj.destination.direction}")
     end
   end
 end
@@ -123,7 +123,7 @@ class Line
   def initialize doc, station
     @station = station
     @destination = Destination.new((doc/"destination").inner_html)
-    estimates = (doc/"estimate").inner_html.gsub(/\s|min/,'').split(/,/).map(&:to_i)
+    estimates = (doc/"estimate").inner_html.gsub(/\s|min/,'').split(/,/).map{|e|e.to_i}
     @trains = find_trains estimates
   end
 
@@ -166,10 +166,4 @@ get '/main.css'   do
 end
 get '/common.css' do
   require 'sass'; sass :common
-end
-
-class String
-  def titlize
-    split(/(\W)/).map(&:capitalize).join
-  end
 end
