@@ -1,3 +1,18 @@
+if (!typeof(console)) {
+  var noFunk = function(){};
+  console = {
+    debug: noFunk,
+    err: noFunk,
+    info: noFunk,
+    log: noFunk,
+    warn: noFunk,
+    trace: noFunk
+  };
+}
+var debug = true;
+var LOG = function(o) {
+  if (debug) console.log(o);
+}
 var Bart = Class.create({
   initialize: function(options) {
     this._trains = options.trains;
@@ -30,7 +45,10 @@ var Bart = Class.create({
       var div = $('trains_'+dir);
       var here = '_' + this._station;
       this._directedTrains[dir].each(function(train){
-        if (!train.seen_at[here]) return;
+        if (train.seen_at[here] == undefined) {
+          LOG(['not logged => ', train.seen_at])
+          return;
+        }
         var className = 'box train ' + (noColor ? train.destination : '');
         var trainDiv = new Element('div', {'class': className}).update(train.seen_at["_EMBR"]);
         train.div = trainDiv;
@@ -53,10 +71,18 @@ var Bart = Class.create({
     if (this._lastSelected) {
       this._lastSelected.removeClassName('selected');
     }
+    ['MONT', 'POWL', 'CIVC', '16TH'].each(function(c){
+      $$('.reachable-'+c).invoke('removeClassName', 'reachable-'+c);
+    });
     trainDiv.addClassName('selected')
     if (trainData.direction == 'home') {
-      if (trainData.seen_at['_CIVC'])
-      console.log(this._directedTrains.west);
+      if (trainData.seen_at['_CIVC']) {
+        this._directedTrains.west.each(function(t) {
+          if (t.div && t.seen_at['_CIVC'] < trainData.seen_at['_CIVC']) {
+            t.div.addClassName('reachable-CIVC')
+          }
+        });
+      }
     }
     this._lastSelected = trainDiv;
   },

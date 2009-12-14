@@ -5,6 +5,7 @@ body
   div#buttons
     :background-color darkgray
     input[type=button]
+      +rounded
       &#refresh
         :background-color lightgray
       &#color
@@ -36,6 +37,8 @@ body
           :background-color = !bart_blue
         &.selected
           :background-color = !selected_yellow
+        &.reachable-civc
+          :background-color = !reach_orange
   div#comment
     :margin-top 5px
     :padding 1px
