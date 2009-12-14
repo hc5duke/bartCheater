@@ -1,14 +1,10 @@
-if (!typeof(console)) {
-  var noFunk = function(){};
-  console = {
-    debug: noFunk,
-    err: noFunk,
-    info: noFunk,
-    log: noFunk,
-    warn: noFunk,
-    trace: noFunk
-  };
+if (typeof(console) == 'undefined') {
+  var Console = Class.create({
+    log: function() {}
+  });
+  console = new Console();
 }
+
 var debug = false;
 var LOG = function(o) {
   if (debug) console.log(o);
@@ -29,6 +25,12 @@ var Bart = Class.create({
         this.trainClickEvent(e);
       }
     }.bind(this));
+  },
+
+  _setStatus: function(msg) {
+    if ($('status') && $('status').down('span')) {
+      $('status').down('span').update(msg);
+    }
   },
 
   _splitTrains: function() {
@@ -78,13 +80,22 @@ var Bart = Class.create({
     var boxWidth = 50;
     var trainDiv = e.element();
     var trainData = trainDiv.retrieve('train');
+    this._setStatus([
+      'e=', trainData.seen_at._EMBR,
+      ' m=', trainData.seen_at._MONT,
+      ' p=', trainData.seen_at._POWL,
+      ' c=', trainData.seen_at._CIVC,
+      ' 6=', trainData.seen_at._16TH
+    ].join(''));
     LOG(trainData)
     var stations = ['_MONT', '_POWL', '_CIVC', '_16TH'].reverse();
+    // remove old classes and styles
     if (this._lastSelected) {
       this._lastSelected.removeClassName('selected');
     }
     stations.each(function(c){
       $$('.reachable'+c).invoke('removeClassName', 'reachable'+c);
+      $('box' + c.toLowerCase()).setStyle({ top: '-20px' });
     });
     $$('.not_reachable').invoke('removeClassName', 'not_reachable');
     trainDiv.addClassName('selected');
@@ -102,14 +113,12 @@ var Bart = Class.create({
             }
           });
         }
-        var div = $('box' + c.toLowerCase()), top, left;
         if (maxOffset.left) {
+          var div = $('box' + c.toLowerCase()), top, left;
           top = maxOffset.top + 2 + 8*i;
           left = (maxOffset.left + boxWidth - div.offsetWidth-2);
-        } else {
-          left = -20;
+          div.setStyle({ top: top + 'px', left: left + 'px' });
         }
-        div.setStyle({ top: top + 'px', left: left + 'px' });
       }, this);
     }
     this._lastSelected = trainDiv;
