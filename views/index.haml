@@ -14,14 +14,19 @@
       %input{:type => "button", :value => "Refresh", :id => "refresh"}
       %input{:type => "button", :value => "#{"No " if using_color}Color", :id => "#{"no_" if using_color}color"}
     %div{:class => "br"}
-    %div{:id => "trains"}
-      %div{:class => "box direction"}
-        Home
-      %div{:id => "trains_home"}
-      %div{:class => "br"}
-      %div{:class => "box direction"}
-        West
-      %div{:id => "trains_west"}
-      %div{:class => "br"}
+    %table{:id => "trains"}
+      %tbody
+        %tr
+          %td{:class => "box direction"}
+            Home
+          %td
+            %div{:id => "trains_home"}
+            %div{:class => "br"}
+        %tr
+          %td{:class => "box direction"}
+            West
+          %td
+            %div{:id => "trains_west"}
+            %div{:class => "br"}
     %div{:id => "comment"}
       status
