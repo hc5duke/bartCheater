@@ -22,6 +22,13 @@ var Bart = Class.create({
     this._lastSelected = null;
     document.observe('dom:loaded', this.setupHtml.bind(this));
     document.observe('dom:loaded', this.observeClicks.bind(this));
+    Event.observe(window, 'resize', function() {
+      var element = this._lastSelected;
+      if (element) {
+        var e = { element: function() {return element;} };
+        this.trainClickEvent(e);
+      }
+    }.bind(this));
   },
 
   _splitTrains: function() {
@@ -33,11 +40,13 @@ var Bart = Class.create({
   },
 
   setupHtml: function() {
-    var refresh = $('refresh');
+    var refresh = $$('input.refresh');
     var color = $('color');
     var noColor = $('no_color');
 
-    refresh.onclick = function() { location.reload(true); };
+    refresh.each(function(r){
+      r.onclick = function() { location.reload(true); };
+    })
     if (color) { color.onclick = function() { location.search = "?color=true"; } }
     if (noColor) { noColor.onclick = function() { location.search = ""; } }
 
@@ -89,9 +98,7 @@ var Bart = Class.create({
               t.div.removeClassName('not_reachable');
               t.div.addClassName('reachable'+c);
               var offset = t.div.positionedOffset();
-              if (offset.left > maxOffset.left) {
-                maxOffset = offset;
-              }
+              maxOffset = offset;
             }
           });
         }

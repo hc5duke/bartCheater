@@ -11,7 +11,7 @@
   %body
     %div{:id => "buttons"}
       %img{:src => "/bc_small.png", :width => 27, :height => 20}
-      %input{:type => "button", :value => "Refresh", :id => "refresh"}
+      %input{:type => "button", :value => "Refresh", :class => "refresh"}
       %input{:type => "button", :value => "#{"No " if using_color}Color", :id => "#{"no_" if using_color}color"}
     %div{:class => "br"}
     %table{:id => "trains"}
@@ -28,8 +28,9 @@
           %td
             %div{:id => "trains_west"}
             %div{:class => "br"}
-    %div{:id => "comment"}
+    %div{:id => "status"}
       status
+      %input{:type => "button", :value => "Refresh", :class => "refresh"}
     %div{:id => "box_mont"}
       M
     %div{:id => "box_powl"}
