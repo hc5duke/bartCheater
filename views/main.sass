@@ -1,17 +1,10 @@
 @import common
-=with_color(!c)
-  :width 40px
-  :padding 8px 0px
-  :border-width 5px
-  :border-color = !c
-
 body
   :margin 0px
   :font-family helvetica, arial
   div#buttons
     :background-color darkgray
     input[type=button]
-      :background none
       &#refresh
         :background-color lightgray
       &#color
@@ -39,5 +32,7 @@ body
       +with_color(!blue_line)
     &:hover
       :background-color = !bart_blue
+    &.selected
+      :background-color = !selected_yellow
   div.br
     :clear left

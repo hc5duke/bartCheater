@@ -1,34 +1,44 @@
-document.observe('dom:loaded', function(){
-  var refresh = $('refresh');
-  var color = $('color');
-  var noColor = $('no_color');
+var Bart = Class.create({
+  initialize: function(options) {
+    this._trains = options.trains;
+    this._lastSelected = null;
+    document.observe('dom:loaded', this.setupHtml.bind(this));
+    document.observe('dom:loaded', this.observeClicks.bind(this));
+  },
 
-  refresh.onclick = function() { location.reload(true); };
-  if (color) { color.onclick = function() { location.search = "?color=true"; } }
-  if (noColor) { noColor.onclick = function() { location.search = ""; } }
+  setupHtml: function() {
+    var refresh = $('refresh');
+    var color = $('color');
+    var noColor = $('no_color');
 
-  ['home', 'west'].each(function(dir) {
-    trains.findAll(function(t){
-      return t.direction == dir;
-    }).each(function(train){
-      if (!train.seen_at["_EMBR"]) return;
-      var div = ["<div class=\"train ", (noColor ? train.destination : ''), "\">", train.seen_at["_EMBR"], "</div>"]
-      $('trains_'+dir).insert(div.join(''));
-    });
-  });
+    refresh.onclick = function() { location.reload(true); };
+    if (color) { color.onclick = function() { location.search = "?color=true"; } }
+    if (noColor) { noColor.onclick = function() { location.search = ""; } }
 
-  // $('home').select('div.train').each(function(train){
-  //   train.onclick = function() {
-  //     console.log('click !')
-  //   }
-  // });
-  // -[:home, :west].each do |dir|
-  //   %div{:id => dir.to_s}
-  //     %h1
-  //       =dir.to_s.titlize
-  //     -@bart.trains[dir].each do |train|
-  //       -next if train.offset_eta < 0
-  //       %div{:class => "train #{train.destination.class_name if using_color}"}
-  //         =train.offset_eta
-  //     %div{:class => "br"}
+    ['home', 'west'].each(function(dir) {
+      var div = $('trains_'+dir);
+      this._trains.findAll(function(t){
+        return t.direction == dir;
+      }).each(function(train){
+        if (!train.seen_at["_EMBR"]) return;
+        var trainDiv = ["<div class=\"train ", (noColor ? train.destination : ''), "\">", train.seen_at["_EMBR"], "</div>"]
+        div.insert(trainDiv.join(''));
+      });
+    }, this);
+  },
+
+  observeClicks: function() {
+    $$('div.train').each(function(train){
+      train.onclick = this.trainClickEvent.bind(this);
+    }, this);
+  },
+
+  trainClickEvent: function(e) {
+    var train = e.element();
+    if (this._lastSelected) {
+      this._lastSelected.removeClassName('selected');
+    }
+    train.addClassName('selected')
+    this._lastSelected = train;
+  }
 });
