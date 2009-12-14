@@ -2,7 +2,6 @@ require 'rubygems'
 require 'sinatra'
 require 'open-uri'
 require 'hpricot'
-require 'ruby-debug'
 require 'haml'
 require 'json'
 
