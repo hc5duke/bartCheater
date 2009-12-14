@@ -21,7 +21,6 @@ body
       :margin 1px
       :width 50px
       :padding 13px 0px
-      &.direction
       &.train
         :width 50px
         :text-align center
@@ -37,6 +36,8 @@ body
           :background-color = !bart_blue
         &.selected
           :background-color = !selected_yellow
+        &.not_reachable
+          :background-color = !reach_not
         &.reachable_MONT
           :background-color = !reach_darkred
         &.reachable_POWL

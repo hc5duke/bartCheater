@@ -15,7 +15,7 @@ get '/' do
 end
 
 get '/debug' do
-  @bart = Bart.new :debug=>true
+  @bart = Bart.new :debug=>params[:debug] || 1807
   haml :index
 end
 
@@ -28,7 +28,7 @@ end
 class Bart
   attr_accessor :trains, :stations, :center
   def initialize options={}
-    xml = options[:debug] ? "sample/1807.xml" : "http://www.bart.gov/dev/eta/bart_eta.xml"
+    xml = options[:debug] ? "sample/#{options[:debug]}.xml" : "http://www.bart.gov/dev/eta/bart_eta.xml"
     @center = options[:center] || 'EMBR'
     @@station_index = @@station_names.index @center
     @doc = Hpricot(open(xml))/"station"
