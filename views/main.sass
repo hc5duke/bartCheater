@@ -36,8 +36,6 @@ body
           :background-color = !bart_blue
         &.selected
           :background-color = !selected_yellow
-        &.not_reachable
-          :background-color = !reach_not
         &.reachable_MONT
           :background-color = !reach_darkred
         &.reachable_POWL
@@ -46,6 +44,8 @@ body
           :background-color = !reach_orange
         &.reachable_16TH
           :background-color = !reach_yellow
+        &.not_reachable
+          :background-color = !reach_not
   div#comment
     :margin-top 5px
     :padding 1px
@@ -53,3 +53,22 @@ body
     :color gray
   div.br
     :clear left
+  div#box_mont, div#box_powl, div#box_civc, div#box_16th
+    +rounded(2px)
+    :position absolute
+    :font-size 9px
+    :left -20px
+    :top 0px
+    :padding 1px 0px
+    :width 12px
+    :text-align center
+    :border 1px solid black
+    :background-color white
+  div#box_mont
+    :top 0px
+  div#box_powl
+    :top 10px
+  div#box_civc
+    :top 20px
+  div#box_16th
+    :top 30px

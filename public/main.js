@@ -9,7 +9,7 @@ if (!typeof(console)) {
     trace: noFunk
   };
 }
-var debug = true;
+var debug = false;
 var LOG = function(o) {
   if (debug) console.log(o);
 }
@@ -66,29 +66,44 @@ var Bart = Class.create({
   },
 
   trainClickEvent: function(e) {
+    var boxWidth = 50;
     var trainDiv = e.element();
     var trainData = trainDiv.retrieve('train');
     LOG(trainData)
+    var stations = ['_MONT', '_POWL', '_CIVC', '_16TH'].reverse();
     if (this._lastSelected) {
       this._lastSelected.removeClassName('selected');
     }
-    var stations = ['_MONT', '_POWL', '_CIVC', '_16TH'];
     stations.each(function(c){
       $$('.reachable'+c).invoke('removeClassName', 'reachable'+c);
     });
     $$('.not_reachable').invoke('removeClassName', 'not_reachable');
-    trainDiv.addClassName('selected')
+    trainDiv.addClassName('selected');
     if (trainData.direction == 'home') {
       $$('#trains_west div.box').invoke('addClassName', 'not_reachable');
-      stations.each(function(c){
+      stations.each(function(c, i){
+        var maxOffset = {left: 0};
         if (trainData.seen_at[c]) {
           this._directedTrains.west.each(function(t) {
             if (t.div && t.seen_at[c] < trainData.seen_at[c]) {
+              t.div.removeClassName('not_reachable');
               t.div.addClassName('reachable'+c);
+              var offset = t.div.positionedOffset();
+              if (offset.left > maxOffset.left) {
+                maxOffset = offset;
+              }
             }
           });
         }
-      }, this)
+        var div = $('box' + c.toLowerCase()), top, left;
+        if (maxOffset.left) {
+          top = maxOffset.top + 2 + 8*i;
+          left = (maxOffset.left + boxWidth - div.offsetWidth-2);
+        } else {
+          left = -20;
+        }
+        div.setStyle({ top: top + 'px', left: left + 'px' });
+      }, this);
     }
     this._lastSelected = trainDiv;
   },
